@@ -29,6 +29,11 @@ const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
  * https://github.com/webpack-contrib/uglifyjs-webpack-plugin
  */
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+/**
+ * remove your build folder(s) before building
+ * https://github.com/johnagan/clean-webpack-plugin
+ */
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 // const extractCSS = new ExtractTextPlugin({
 //   filename: 'assets/css/[name]-css.css',
@@ -43,16 +48,81 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const isProd = process.env.NODE_ENV === 'production';
 const entries = {};
 const chunks = [];
+let cssLoaders = {};
+let cssRules = {};
 
+console.log('\x1b[32m%s\x1b[0m', '----------');
+console.log('\x1b[36m', 'ENV: ' + process.env.NODE_ENV);
+console.log('\x1b[32m%s\x1b[0m', '[path]');
 // Perform a synchronous glob search.
 glob.sync('./src/pages/**/app.js').forEach(path => {
-  console.log('path ', path);
+  console.log('path: ', path);
   const chunk = path.split('./src/pages/')[1].split('/app.js')[0];
   entries[chunk] = path;
   chunks.push(chunk);
 });
-console.log('entries ', entries);
+
+console.log('\x1b[32m%s\x1b[0m', '[entries]');
+console.log(entries);
+console.log('\x1b[32m%s\x1b[0m', '[chunks]');
 console.log('chunks ', chunks);
+console.log('\x1b[32m%s\x1b[0m', '----------');
+
+if (isProd) {
+  cssLoaders = {
+    css: ExtractTextPlugin.extract({
+      use: 'css-loader',
+      // loader(e.g 'style-loader') that should be used when the CSS is not extracted
+      // (i.e. in an additional chunk when allChunks: false)
+      fallback: 'style-loader'
+    }),
+    scss: ExtractTextPlugin.extract({
+      use: ['css-loader', 'postcss-loader', 'sass-loader'],
+      fallback: 'style-loader'
+    })
+
+  };
+
+  cssRules = [
+    {
+      test: /\.css$/,
+      use: ExtractTextPlugin.extract({
+        use: ['css-loader', 'postcss-loader'],
+        fallback: 'style-loader'
+      })
+    },
+    {
+      test: /\.scss$/,
+      use: ExtractTextPlugin.extract({
+        use: ['css-loader', 'postcss-loader', 'sass-loader'],
+        fallback: 'style-loader'
+      })
+    }
+  ];
+} else {
+
+  cssLoaders = {
+    'scss': 'vue-style-loader!css-loader!sass-loader',
+    'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
+  };
+
+  cssRules = [
+    {
+      test: /\.css$/,
+      use: [
+        'style-loader',
+        'css-loader'
+      ]
+    },
+    {
+      test: /\.scss$/,
+      use: [
+        'style-loader',
+        'css-loader',
+        'sass-loader'
+      ]
+    }];
+}
 
 const config = {
   entry: entries,
@@ -76,55 +146,13 @@ const config = {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
-          loaders: {
-            // css: ExtractTextPlugin.extract({
-            //   use: 'css-loader',
-            //   // loader(e.g 'style-loader') that should be used when the CSS is not extracted
-            //   // (i.e. in an additional chunk when allChunks: false)
-            //   fallback: 'style-loader'
-            // }),
-            // scss: ExtractTextPlugin.extract({
-            //   use: ['css-loader', 'postcss-loader', 'sass-loader'],
-            //   fallback: 'style-loader'
-            // })
-            'scss': 'vue-style-loader!css-loader!sass-loader',
-            'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
-          }
+          loaders: cssLoaders
         }
       },
       {
         test: /\.js$/,
         use: 'babel-loader',
         exclude: /node_modules/
-      },
-      // {
-      //   test: /\.css$/,
-      //   use: ExtractTextPlugin.extract({
-      //     use: ['css-loader', 'postcss-loader'],
-      //     fallback: 'style-loader'
-      //   })
-      // },
-      // {
-      //   test: /\.scss$/,
-      //   use: ExtractTextPlugin.extract({
-      //     use: ['css-loader', 'postcss-loader', 'sass-loader'],
-      //     fallback: 'style-loader'
-      //   })
-      // },
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader'
-        ]
-      },
-      {
-        test: /\.scss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'sass-loader'
-        ]
       },
       /**
        * https://doc.webpack-china.org/loaders/html-loader/
@@ -155,23 +183,11 @@ const config = {
           }
         }]
       }
-    ]
+    ].concat(cssRules)
   },
   plugins: [
     // https://webpack.js.org/plugins/module-concatenation-plugin/
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new CommonsChunkPlugin({
-      name: 'vendors',
-      filename: 'assets/js/vendors.js',
-      chunks: chunks,
-      minChunks: chunks.length
-    })
-    // extractCSS,
-    // extractSASS
-    // new ExtractTextPlugin({
-    //   filename: 'assets/css/[name].css',
-    //   allChunks: true
-    // })
+    new webpack.optimize.ModuleConcatenationPlugin()
   ],
   devServer: {
     port: 8060,
@@ -199,9 +215,12 @@ glob.sync('./src/pages/**/*.html').forEach(path => {
 module.exports = config;
 
 if (isProd) {
-  module.exports.devtool = 'source-map';
+  config.output.filename = 'assets/js/[name].[chunkhash].js';
+  config.output.chunkFilename = 'assets/js/[id].[chunkhash].js';
+  config.devtool = 'source-map';
   // http://vue-loader.vuejs.org/en/workflow/production.html
-  module.exports.plugins = (module.exports.plugins || []).concat([
+  config.plugins = (module.exports.plugins || []).concat([
+    new CleanWebpackPlugin(['dist']),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: '"production"'
@@ -213,6 +232,20 @@ if (isProd) {
       },
       sourceMap: true
     }),
-    new OptimizeCSSPlugin()
+    // extractCSS,
+    // extractSASS
+    new ExtractTextPlugin({
+      filename: 'assets/css/[name].[contenthash].css',
+      allChunks: true
+    }),
+    new OptimizeCSSPlugin(),
+    new CommonsChunkPlugin({
+      name: 'vendors',
+      // filename: 'assets/js/vendors.js',
+      chunks: chunks,
+      minChunks: chunks.length
+    })
   ]);
 }
+
+
