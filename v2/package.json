@@ -2,7 +2,8 @@
   "name": "application-name",
   "version": "0.0.1",
   "scripts": {
-    "start": "webpack-dev-server --progress"
+    "start": "webpack",
+    "server": "webpack-dev-server --open"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
