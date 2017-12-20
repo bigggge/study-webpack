@@ -1,7 +1,9 @@
-var other = require('./other.js')
-console.log('index')
-other.f1()
+import other, {f2} from './other.js'
 
-import(/* webpackChunkName: "foo" */ './foo').then(bar => {
-  console.log(foo())
+console.log('index')
+other()
+f2()
+
+import(/* webpackChunkName: "foo" */ './foo').then(foo => {
+  console.log(foo.fa())
 })
