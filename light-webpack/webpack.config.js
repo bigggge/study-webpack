@@ -1,16 +1,17 @@
 const path = require('path')
+const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    import2: './src/index.js'
-    // commonjs: './src/commonjs/index.js'
+    // import2: './src/index.js',
+    commonjs2: './src/commonjs/index.js'
   },
   output: {
     filename: '[name].[id].bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
-    new webpack.HashedModuleIdsPlugin()
+    // new webpack.HashedModuleIdsPlugin()
   ]
   // module: {
   //   rules: [

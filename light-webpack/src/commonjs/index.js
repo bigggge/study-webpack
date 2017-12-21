@@ -1,3 +1,4 @@
-var other = require('./other.js')
+import other from './other'
+
 console.log('index')
 other.f1()

@@ -47,6 +47,9 @@
   }
 
   // getDefaultExport function for compatibility with non-harmony modules
+  // 如果遇到 commonjs 和 es6 模块混用时，这段代码将发生作用
+  // __webpack_require__.n 会判断 module 是否为 es6 模块，
+  // 当 __esModule 为 true 的时候，那么 module.a 默认返回 module.default，否则返回 module
   __webpack_require__.n = function (module) {
     var getter = module && module.__esModule
       ? function getDefault () { return module['default'] }

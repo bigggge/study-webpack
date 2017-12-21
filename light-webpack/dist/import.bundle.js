@@ -1,8 +1,9 @@
-(function (modules) {
-  // webpackBootstrap
-  // install a JSONP callback for chunk loading
+/*
+   webpack 对基于 import() 动态导入进行代码分离的实现，分离代码为 0.0.bundle.js
+   */
+(function (modules) { // webpackBootstrap
+                      // install a JSONP callback for chunk loading
   var parentJsonpFunction = window['webpackJsonp']
-  // webpackJsonpCallback 接受的参数，对应了 0.0.bundle.js 中调用 webpackJsonp 时传入的三个参数
   window['webpackJsonp'] = function webpackJsonpCallback (chunkIds, moreModules, executeModules) {
     // add "moreModules" to the modules object,
     // then flag all "chunkIds" as loaded and fire callback
@@ -14,7 +15,6 @@
       }
       installedChunks[chunkId] = 0
     }
-    // 遍历 moreModules 并赋值到 modules中
     for (moduleId in moreModules) {
       if (Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
         modules[moduleId] = moreModules[moduleId]
@@ -28,7 +28,6 @@
   }
 
   // The module cache
-  // 模块缓存
   var installedModules = {}
 
   // objects to store loaded and loading chunks
@@ -37,7 +36,6 @@
   }
 
   // The require function
-  // webpack require 函数
   function __webpack_require__ (moduleId) {
 
     // Check if module is in cache
@@ -63,13 +61,16 @@
 
   // This file contains only the entry chunk.
   // The chunk loading function for additional chunks
+  // 对于 code splitting 的支持，webpack 使用 __webpack_require__.e 实现基于 promise 的动态加载
   __webpack_require__.e = function requireEnsure (chunkId) {
     var installedChunkData = installedChunks[chunkId]
+    // 当请求同一脚本文件时，由于对应的 module 已经被加载，因而直接返回一个成功的 promise 即可
     if (installedChunkData === 0) {
       return new Promise(function (resolve) { resolve() })
     }
 
     // a Promise means "currently loading".
+    // 取缓存的 promise
     if (installedChunkData) {
       return installedChunkData[2]
     }
@@ -78,9 +79,11 @@
     var promise = new Promise(function (resolve, reject) {
       installedChunkData = installedChunks[chunkId] = [resolve, reject]
     })
+    // 将数组的第三项赋值为这个 promise,用于缓存 promise
     installedChunkData[2] = promise
 
     // start chunk loading
+    // 创建一个 script 标签动态加载脚本
     var head = document.getElementsByTagName('head')[0]
     var script = document.createElement('script')
     script.type = 'text/javascript'
@@ -100,6 +103,8 @@
       script.onerror = script.onload = null
       clearTimeout(timeout)
       var chunk = installedChunks[chunkId]
+      // 由 webpackJsonpCallback 方法得知脚本文件下载成功后，installedChunks[chunkId] = 0
+      // 脚本下载失败的情况
       if (chunk !== 0) {
         if (chunk) {
           chunk[1](new Error('Loading chunk ' + chunkId + ' failed.'))
@@ -158,7 +163,7 @@
 })
 ([
   /* 0 */
-  /***/ (function (module, __webpack_exports__, __webpack_require__) {
+  (function (module, __webpack_exports__, __webpack_require__) {
 
     'use strict'
     Object.defineProperty(__webpack_exports__, '__esModule', {value: true})
@@ -173,10 +178,9 @@
       console.log(foo.fa())
     })
 
-    /***/
   }),
   /* 1 */
-  /***/ (function (module, __webpack_exports__, __webpack_require__) {
+  (function (module, __webpack_exports__, __webpack_require__) {
 
     'use strict'
     /* harmony export (immutable) */
@@ -191,7 +195,5 @@
     function f2 () {
       console.log('f2')
     }
-
-    /***/
   })
-  /******/])
+])
