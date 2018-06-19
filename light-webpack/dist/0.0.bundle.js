@@ -1,16 +1,10 @@
-webpackJsonp([0],{
-
-/***/ 2:
-/***/ (function(module, exports) {
-
-exports.fa = function () {
-  return 'a'
-}
-
-exports.fb = function () {
-  return 'b'
-}
-
-/***/ })
-
-});
+webpackJsonp([0], {
+  2: (function (module, exports) {
+    exports.fa = function () {
+      return 'a'
+    }
+    exports.fb = function () {
+      return 'b'
+    }
+  })
+})

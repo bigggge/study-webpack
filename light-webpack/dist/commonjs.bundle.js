@@ -87,7 +87,6 @@
   // 加载入口模块
   return __webpack_require__(__webpack_require__.s = 0)
 })
-/************************************************************************/
 ([
   /* 0 */
   (function (module, exports, __webpack_require__) {
