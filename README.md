@@ -1,4 +1,5 @@
-## v2
+## v2 gst
+
 
 [webpack v2 example](/v2)
 

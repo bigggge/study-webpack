@@ -16,6 +16,26 @@ module.exports = merge(baseWebpackConfig, {
   output: {
     filename: 'js/[name].[hash:16].js'
   },
+  rules: [
+    {
+      test: /\.(css)$/,
+      use: [
+        // 导出css文件
+        { loader: 'style-loader' },
+        { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+        { loader: 'postcss-loader' }
+      ]
+    },
+    {
+      test: /\.(less)$/,
+      use: [
+        { loader: 'style-loader' },
+        { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+        { loader: 'postcss-loader' },
+        { loader: 'less-loader' }
+      ]
+    }
+  ],
   plugins: [
     new HtmlWebpackPlugin({
       template: 'public/index.html',
@@ -28,14 +48,14 @@ module.exports = merge(baseWebpackConfig, {
     new webpack.HotModuleReplacementPlugin()
   ],
   devServer: {
-    port: '3013',
+    port: '3015',
     contentBase: path.join(__dirname, '../public'),
     compress: true, // gzip
     historyApiFallback: true,
     hot: true, // 启用 webpack 的模块热替换特性
     https: false,
     noInfo: false,
-    open: false, // open the browser
+    open: true, // open the browser
     proxy: {}
   }
 });

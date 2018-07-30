@@ -9,11 +9,35 @@ const merge = require('webpack-merge');
 const baseWebpackConfig = require('./webpack.base.conf.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = merge(baseWebpackConfig, {
   mode: 'production',
   output: {
     filename: 'js/[name].[chunkhash:16].js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(css)$/,
+        use: [
+          // 导出css文件
+          MiniCSSExtractPlugin.loader,
+          { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+          { loader: 'postcss-loader' }
+        ]
+      },
+      {
+        test: /\.(less)$/,
+        use: [
+          MiniCSSExtractPlugin.loader,
+          { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+          { loader: 'postcss-loader' },
+          { loader: 'less-loader' }
+        ]
+      }
+    ]
   },
   optimization: {
     splitChunks: {
@@ -26,7 +50,14 @@ module.exports = merge(baseWebpackConfig, {
           name: 'vendors'
         }
       }
-    }
+    },
+    minimizer: [
+      new OptimizeCSSAssetsWebpackPlugin({
+        cssProcessorOptions: {
+          map: { inline: false }
+        }
+      })
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -38,6 +69,10 @@ module.exports = merge(baseWebpackConfig, {
         removeAttributeQuotes: true
       }
     }),
-    new CleanWebpackPlugin(['../dist'], { allowExternal: true })
+    new CleanWebpackPlugin(['../dist'], { allowExternal: true }),
+    new MiniCSSExtractPlugin({
+      filename: 'css/[name].[hash].css',
+      chunkFilename: 'css/[id].[hash].css'
+    })
   ]
 });
