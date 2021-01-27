@@ -22,7 +22,7 @@ module.exports = merge(baseWebpackConfig, {
       use: [
         // 导出css文件
         { loader: 'style-loader' },
-        { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+        { loader: 'css-loader', options: { modules: { localIdentName: '[local]__[hash:7]' } } },
         { loader: 'postcss-loader' }
       ]
     },
@@ -30,7 +30,7 @@ module.exports = merge(baseWebpackConfig, {
       test: /\.(less)$/,
       use: [
         { loader: 'style-loader' },
-        { loader: 'css-loader', options: { modules: true, localIdentName: '[local]__[hash:7]' } },
+        { loader: 'css-loader', options: { modules: { localIdentName: '[local]__[hash:7]' } } },
         { loader: 'postcss-loader' },
         { loader: 'less-loader' }
       ]
